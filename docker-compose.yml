@@ -5,28 +5,21 @@ services:
     image: postgres:15-alpine
     container_name: postgres
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: n8n
-      POSTGRES_USER: n8n
-      POSTGRES_PASSWORD: n8np4ssw0rd
+    env_file:
+      - ./services/postgres/.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - n8n-network
   
-  n8n:
+  n8n-lab:
     image: n8nio/n8n:2.0.2
-    container_name: n8n
+    container_name: n8n-lab
     restart: unless-stopped
     ports:
       - "5678:5678"
-    environment:
-      - DB_TYPE=postgresdb
-      - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=n8n
-      - DB_POSTGRESDB_HOST=postgres
-      - DB_POSTGRESDB_USER=n8n
-      - DB_POSTGRESDB_PASSWORD=n8np4ssw0rd
+    env_file:
+      - ./services/n8n/lab/.env
     volumes:
       - n8n-data:/home/node/.n8n
     networks:
@@ -36,8 +29,10 @@ services:
 
 volumes:
   postgres-data:
+    driver: local
     name: postgres-data
   n8n-data:
+    driver: local
     name: n8n-data
 
 networks:
