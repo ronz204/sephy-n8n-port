@@ -6,11 +6,17 @@ services:
     container_name: postgres
     restart: unless-stopped
     env_file:
-      - ./services/postgres/.env
+      - ./services/postgres/secrets/.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./services/postgres/healthcheck.sh:/healthcheck.sh:ro
     networks:
       - n8n-network
+    healthcheck:
+      test: ["CMD-SHELL", "/healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   
   n8n-lab:
     image: n8nio/n8n:2.0.2
@@ -19,13 +25,14 @@ services:
     ports:
       - "5678:5678"
     env_file:
-      - ./services/n8n/lab/.env
+      - ./services/n8n/lab/secrets/.env
     volumes:
       - n8n-lab-data:/home/node/.n8n
     networks:
       - n8n-network
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 volumes:
   n8n-lab-data:
