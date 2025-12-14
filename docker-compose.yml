@@ -21,19 +21,19 @@ services:
     env_file:
       - ./services/n8n/lab/.env
     volumes:
-      - n8n-data:/home/node/.n8n
+      - n8n-lab-data:/home/node/.n8n
     networks:
       - n8n-network
     depends_on:
       - postgres
 
 volumes:
+  n8n-lab-data:
+    driver: local
+    name: n8n-lab-data
   postgres-data:
     driver: local
     name: postgres-data
-  n8n-data:
-    driver: local
-    name: n8n-data
 
 networks:
   n8n-network:
