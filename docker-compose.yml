@@ -9,7 +9,8 @@ services:
       - ./services/postgres/secrets/.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./services/postgres/healthcheck.sh:/healthcheck.sh:ro
+      - ./services/postgres/scripts/healthcheck.sh:/healthcheck.sh:ro
+      - ./services/postgres/scripts/initialize.sh:/docker-entrypoint-initdb.d/01-initialize.sh:ro
     networks:
       - n8n-network
     healthcheck:
@@ -25,9 +26,25 @@ services:
     ports:
       - "5678:5678"
     env_file:
-      - ./services/n8n/lab/secrets/.env
+      - ./services/n8n/tester/secrets/.env
     volumes:
       - n8n-lab-data:/home/node/.n8n
+    networks:
+      - n8n-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  alpha:
+    image: n8nio/n8n:2.0.2
+    container_name: n8n-alpha
+    restart: unless-stopped
+    ports:
+      - "5679:5678"
+    env_file:
+      - ./services/n8n/alpha/secrets/.env
+    volumes:
+      - n8n-alpha-data:/home/node/.n8n
     networks:
       - n8n-network
     depends_on:
@@ -41,6 +58,9 @@ volumes:
   postgres-data:
     driver: local
     name: postgres-data
+  n8n-alpha-data:
+    driver: local
+    name: n8n-alpha-data
 
 networks:
   n8n-network:
