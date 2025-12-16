@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0",
+  "clients": {
+    "scientist": {
+      "username": "scientist",
+      "status": "active",
+      "container": "n8n-lab",
+      "compose": "docker-compose.lab.yml"
+    },
+    "alpha": {
+      "username": "alpha",
+      "status": "active",
+      "container": "n8n-alpha",
+      "compose": "docker-compose.alpha.yml"
+    },
+    "beta": {
+      "username": "beta",
+      "status": "inactive",
+      "container": "n8n-beta",
+      "compose": "docker-compose.beta.yml"
+    },
+    "gamma": {
+      "username": "gamma",
+      "status": "inactive",
+      "container": "n8n-gamma",
+      "compose": "docker-compose.gamma.yml"
+    }
+  }
+}
