@@ -1,0 +1,24 @@
+services:
+  n8n-lab:
+    image: n8nio/n8n:2.0.2
+    container_name: n8n-lab
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    env_file:
+      - ./services/n8n/laboratory/secrets/.env
+    volumes:
+      - n8n-lab-data:/home/node/.n8n
+    networks:
+      - infra-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  n8n-lab-data:
+    driver: local
+    name: n8n-lab-data
+
+networks:
+  infra-network:
