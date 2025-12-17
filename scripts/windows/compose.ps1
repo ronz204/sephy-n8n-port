@@ -1,6 +1,6 @@
 param(
   [Parameter(Mandatory=$true)]
-  [ValidateSet('up', 'down', 'restart', 'logs', 'ps', 'build')]
+  [ValidateSet('up', 'down', 'restart', 'logs', 'ps', 'build', 'clean')]
   [string]$Action
 )
 
@@ -8,29 +8,28 @@ param(
 $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $projectRoot
 
-# Auto-detect all compose files
-$composeFiles = @(
-  Get-ChildItem -Path @('.', 'docker') -Filter "docker-compose*.yml" -Recurse -ErrorAction SilentlyContinue |
-    ForEach-Object { $_.FullName.Replace("$projectRoot\", "").Replace("\", "/") }
-)
+# Load context.json
+$context = Get-Content "context.json" | ConvertFrom-Json
 
-if ($composeFiles.Count -eq 0) {
-  Write-Host "No docker-compose files found" -ForegroundColor Red
-  exit 1
-}
+# Get active clients only
+$activeClients = $context.clients.PSObject.Properties.Value | Where-Object { $_.active -eq $true }
+
+# Build compose file list
+$composeFiles = @('docker-compose.yml')
+$composeFiles += $activeClients | ForEach-Object { "docker/$($_.compose)" }
 
 # Build compose arguments
 $composeArgs = $composeFiles | ForEach-Object { @('-f', $_) } | Write-Output
 
 # Action to command mapping
 $commands = @{
-  'ps'      = @('ps')
-  'down'    = @('down')
-  'build'   = @('build')
-  'restart' = @('restart')
   'up'      = @('up', '-d')
-  'clean'   = @('down', '-v')
+  'down'    = @('down')
+  'restart' = @('restart')
   'logs'    = @('logs', '-f')
+  'ps'      = @('ps')
+  'build'   = @('build')
+  'clean'   = @('down', '-v')
 }
 
 # Execute
